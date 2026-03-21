@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial Packet Tracer – DHCP su Router Cisco 2901</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --surface: #ffffff;
+    --surface2: #f0ede6;
+    --border: #ddd8ce;
+    --accent: #1a5c9e;
+    --accent2: #e85d1e;
+    --accent3: #2a9968;
+    --text: #1c1a17;
+    --text2: #5a5650;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --warning-bg: #fff8e6;
+    --warning-border: #f0b429;
+    --tip-bg: #eef8f3;
+    --tip-border: #2a9968;
+    --note-bg: #e8f0fb;
+    --note-border: #1a5c9e;
+    --shadow: 0 2px 16px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 16px; line-height: 1.75; }
+
+  header { background: var(--accent); color: white; padding: 0; position: relative; overflow: hidden; }
+  header::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(255,255,255,0.07) 0%, transparent 60%),
+      repeating-linear-gradient(135deg, transparent, transparent 40px, rgba(255,255,255,0.03) 40px, rgba(255,255,255,0.03) 41px);
+    pointer-events: none;
+  }
+  .header-inner { max-width: 860px; margin: 0 auto; padding: 52px 32px 48px; position: relative; z-index: 1; }
+  .header-badge { display: inline-block; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.30); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; padding: 4px 12px; margin-bottom: 20px; color: rgba(255,255,255,0.90); }
+  header h1 { font-family: 'Lora', serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; line-height: 1.2; margin-bottom: 14px; }
+  header p { font-size: 1.05rem; color: rgba(255,255,255,0.82); max-width: 580px; font-weight: 300; }
+  .header-meta { display: flex; gap: 24px; margin-top: 28px; flex-wrap: wrap; }
+  .meta-chip { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.14); border-radius: 6px; padding: 6px 14px; font-size: 0.82rem; font-weight: 600; letter-spacing: .03em; }
+  .meta-chip svg { flex-shrink: 0; }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  .toc { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; padding: 28px 32px; margin-bottom: 48px; box-shadow: var(--shadow); }
+  .toc-title { font-family: 'Lora', serif; font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: 14px; }
+  .toc ol { padding-left: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
+  @media (max-width: 600px) { .toc ol { grid-template-columns: 1fr; } }
+  .toc a { color: var(--text2); text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: color .2s; }
+  .toc a:hover { color: var(--accent); }
+
+  section { margin-bottom: 60px; }
+  .section-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border); }
+  .section-num { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: var(--accent); color: white; border-radius: 50%; font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 600; flex-shrink: 0; }
+  h2 { font-family: 'Lora', serif; font-size: 1.45rem; font-weight: 700; color: var(--text); }
+  h3 { font-family: 'Nunito Sans', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--accent); margin: 28px 0 10px; display: flex; align-items: center; gap: 8px; }
+  h3::before { content: ''; display: inline-block; width: 4px; height: 16px; background: var(--accent2); border-radius: 2px; }
+  p { margin-bottom: 14px; color: var(--text); }
+
+  .steps { counter-reset: step; }
+  .step { display: flex; gap: 18px; margin-bottom: 22px; align-items: flex-start; }
+  .step-num { counter-increment: step; min-width: 32px; height: 32px; background: var(--accent2); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; flex-shrink: 0; margin-top: 2px; }
+  .step-body { flex: 1; }
+  .step-body strong { color: var(--text); font-weight: 700; }
+
+  .callout { border-radius: 8px; padding: 16px 20px; margin: 20px 0; display: flex; gap: 14px; align-items: flex-start; }
+  .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+  .callout-body { flex: 1; font-size: 0.92rem; }
+  .callout-body strong { display: block; margin-bottom: 4px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: .06em; }
+  .callout.warning { background: var(--warning-bg); border: 1px solid var(--warning-border); }
+  .callout.warning .callout-body strong { color: #9a6400; }
+  .callout.tip    { background: var(--tip-bg);    border: 1px solid var(--tip-border); }
+  .callout.tip    .callout-body strong { color: #1a7a50; }
+  .callout.note   { background: var(--note-bg);   border: 1px solid var(--note-border); }
+  .callout.note   .callout-body strong { color: var(--accent); }
+
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; background: var(--surface2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; color: var(--accent2); }
+  pre { background: var(--code-bg); color: var(--code-text); border-radius: 10px; padding: 20px 24px; overflow-x: auto; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; line-height: 1.7; margin: 16px 0; box-shadow: var(--shadow-lg); }
+  pre code { background: none; border: none; color: inherit; padding: 0; font-size: 1em; }
+  .kw  { color: #89b4fa; }
+  .val { color: #a6e3a1; }
+  .cmt { color: #6c7086; font-style: italic; }
+  .str { color: #f9e2af; }
+  .prm { color: #cba6f7; }
+  .cmd { color: #f38ba8; }
+
+  .table-wrap { overflow-x: auto; margin: 20px 0; border-radius: 8px; box-shadow: var(--shadow); }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); font-size: 0.9rem; }
+  thead th { background: var(--accent); color: white; padding: 12px 16px; text-align: left; font-weight: 700; font-size: 0.82rem; letter-spacing: .05em; text-transform: uppercase; }
+  tbody tr:nth-child(even) { background: var(--surface2); }
+  tbody td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: .04em; }
+  .tag.static   { background: #fde8d8; color: #c04a00; }
+  .tag.dhcp     { background: #d8f0e8; color: #1a6640; }
+  .tag.reserved { background: #dde8fb; color: #1a4e8a; }
+  .tag.router   { background: #f0e8fb; color: #6b21a8; }
+
+  .screenshot { background: var(--surface); border: 2px dashed var(--border); border-radius: 10px; padding: 40px 24px; margin: 24px 0; text-align: center; position: relative; overflow: hidden; transition: border-color .2s; }
+  .screenshot:hover { border-color: var(--accent); }
+  .screenshot::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.018) 10px, rgba(0,0,0,0.018) 11px); }
+  .screenshot-inner { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .screenshot-icon { width: 52px; height: 52px; background: var(--surface2); border: 2px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .screenshot-icon svg { width: 26px; height: 26px; color: var(--text2); }
+  .screenshot-label { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; background: var(--note-bg); border: 1px solid var(--note-border); padding: 3px 12px; border-radius: 4px; }
+  .screenshot-desc { font-size: 0.88rem; color: var(--text2); max-width: 400px; }
+
+  .topology { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin: 24px 0; box-shadow: var(--shadow); }
+  .topo-title { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--text2); margin-bottom: 20px; }
+  .topo-grid { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: center; }
+  .topo-node { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .topo-icon { width: 64px; height: 64px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .topo-icon.rtr { background: #f0e8fb; }
+  .topo-icon.sw  { background: #dde8fb; }
+  .topo-icon.pc  { background: #d8f0e8; }
+  .topo-label { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600; color: var(--text2); text-align: center; }
+  .topo-ip { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--accent2); background: var(--surface2); border: 1px solid var(--border); padding: 1px 7px; border-radius: 4px; }
+  .topo-line { font-size: 1.5rem; color: var(--border); align-self: center; flex-shrink: 0; }
+
+  .ios-mode { display: inline-flex; align-items: center; gap: 6px; background: #2a1f3d; color: #cba6f7; border-radius: 6px; padding: 4px 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; font-weight: 600; margin-bottom: 8px; }
+
+  .quiz { background: linear-gradient(135deg, #1a5c9e 0%, #103d6b 100%); color: white; border-radius: 12px; padding: 32px; margin: 32px 0; box-shadow: var(--shadow-lg); }
+  .quiz-title { font-family: 'Lora', serif; font-size: 1.1rem; margin-bottom: 20px; opacity: .9; }
+  .quiz-q { background: rgba(255,255,255,0.10); border-left: 3px solid rgba(255,255,255,0.4); border-radius: 0 8px 8px 0; padding: 12px 16px; margin-bottom: 12px; font-size: 0.92rem; font-weight: 600; }
+  details.quiz-reveal { margin-top: -4px; }
+  details.quiz-reveal summary { cursor: pointer; font-size: 0.8rem; color: rgba(255,255,255,0.65); padding: 4px 16px 8px; user-select: none; }
+  details.quiz-reveal[open] summary { color: #a6e3a1; }
+  details.quiz-reveal p { background: rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 6px; font-size: 0.88rem; color: #a6e3a1; margin: 0 0 8px 0; }
+
+  footer { background: var(--surface); border-top: 1px solid var(--border); padding: 28px 32px; text-align: center; font-size: 0.82rem; color: var(--text2); }
+  footer strong { color: var(--accent); }
+
+  ul, ol { padding-left: 22px; margin-bottom: 14px; }
+  li { margin-bottom: 5px; }
+  strong { font-weight: 700; }
+  em { font-style: italic; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+  kbd { font-family: 'JetBrains Mono', monospace; font-size: 0.82em; background: var(--surface2); border: 1px solid var(--border); border-bottom-width: 2px; padding: 1px 6px; border-radius: 4px; color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-badge">Sistemi e Reti · Classe 4ª · Packet Tracer</div>
+    <h1>DHCP su Router Cisco 2901<br>con Cisco Packet Tracer</h1>
+    <p>Guida passo-passo per configurare il servizio DHCP direttamente sul router tramite IOS CLI: pool, esclusioni, prenotazioni e verifica dei binding.</p>
+    <div class="header-meta">
+      <div class="meta-chip">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        ~90 minuti
+      </div>
+      <div class="meta-chip">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Livello: Intermedio
+      </div>
+      <div class="meta-chip">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Packet Tracer 8.x · IOS 15
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="toc">
+    <div class="toc-title">📋 Indice</div>
+    <ol>
+      <li><a href="#obiettivi">Obiettivi e prerequisiti</a></li>
+      <li><a href="#teoria">Richiami teorici sul DHCP</a></li>
+      <li><a href="#topologia">Pianificazione della topologia</a></li>
+      <li><a href="#creazione">Creazione della topologia in PT</a></li>
+      <li><a href="#router">Configurazione DHCP sul router 2901</a></li>
+      <li><a href="#pc1">Configurazione PC-1 (IP statico)</a></li>
+      <li><a href="#pc2">Configurazione PC-2 (IP riservato)</a></li>
+      <li><a href="#pc3pc4">Configurazione PC-3 e PC-4 (DHCP)</a></li>
+      <li><a href="#test">Test e verifica</a></li>
+      <li><a href="#quiz">Verifica di apprendimento</a></li>
+    </ol>
+  </div>
+
+  <!-- ══════════ 1 ══════════ -->
+  <section id="obiettivi">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>Obiettivi e prerequisiti</h2>
+    </div>
+    <p>Al termine di questo laboratorio sarai in grado di:</p>
+    <ul>
+      <li>Costruire una topologia in Cisco Packet Tracer con un router 2901, uno switch 2960 e quattro PC client.</li>
+      <li>Configurare l'interfaccia LAN <code>GigabitEthernet0/0</code> del router tramite IOS CLI.</li>
+      <li>Attivare il servizio DHCP nativo di IOS con pool dinamico e indirizzi esclusi.</li>
+      <li>Creare un pool di prenotazione (host pool) che garantisce sempre lo stesso IP a PC-2 tramite binding MAC↔IP.</li>
+      <li>Assegnare un indirizzo statico a PC-1, escluso dallo scope con il comando <code>ip dhcp excluded-address</code>.</li>
+      <li>Verificare la configurazione con <code>show ip dhcp pool</code>, <code>show ip dhcp binding</code>, <code>ipconfig</code> e <code>ping</code>.</li>
+    </ul>
+    <h3>Prerequisiti</h3>
+    <ul>
+      <li>Conoscenza dell'indirizzamento IPv4 e del subnetting /24.</li>
+      <li>Nozioni sul protocollo DHCP (processo DORA).</li>
+      <li>Familiarità di base con la CLI IOS (modalità privilegiata e di configurazione globale).</li>
+      <li>Cisco Packet Tracer 8.x installato sul proprio computer.</li>
+    </ul>
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>Attenzione</strong>
+        Salva frequentemente il file <code>.pkt</code> con <kbd>Ctrl+S</kbd>. Packet Tracer non prevede il salvataggio automatico.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 2 ══════════ -->
+  <section id="teoria">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>Richiami teorici sul DHCP</h2>
+    </div>
+    <p>Il protocollo <strong>DHCP</strong> (Dynamic Host Configuration Protocol, RFC 2131) assegna automaticamente ai client i parametri di rete: indirizzo IP, subnet mask, gateway predefinito e server DNS.</p>
+
+    <h3>Il processo DORA</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-body"><strong>Discover</strong> — Il client invia in broadcast un <code>DHCPDISCOVER</code> cercando un server disponibile sulla rete locale.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body"><strong>Offer</strong> — Il router risponde con un <code>DHCPOFFER</code> contenente un IP disponibile e i parametri di rete.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body"><strong>Request</strong> — Il client accetta l'offerta inviando un <code>DHCPREQUEST</code> in broadcast, notificando tutti i server della propria scelta.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body"><strong>Acknowledge</strong> — Il router conferma l'assegnazione con un <code>DHCPACK</code>. Il client è ora configurato e operativo sulla rete.</div></div>
+    </div>
+
+    <h3>Concetti chiave dello scope DHCP su IOS</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Termine IOS</th><th>Significato</th></tr></thead>
+        <tbody>
+          <tr><td><code>ip dhcp pool</code></td><td>Crea un pool DHCP. Può essere dinamico (<code>network</code>) o di prenotazione (<code>host</code>).</td></tr>
+          <tr><td><code>ip dhcp excluded-address</code></td><td>Dichiarazione globale degli IP che il router non assegnerà mai (router stesso, host statici, range fuori scope).</td></tr>
+          <tr><td><code>host</code></td><td>Direttiva del pool che riserva un IP a un singolo client identificato tramite MAC.</td></tr>
+          <tr><td><code>hardware-address</code></td><td>MAC address del client a cui è destinata la prenotazione.</td></tr>
+          <tr><td><code>default-router</code></td><td>Gateway predefinito comunicato ai client. Corrisponde all'IP dell'interfaccia LAN del router.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout note">
+      <div class="callout-icon">📝</div>
+      <div class="callout-body">
+        <strong>DHCP nativo su IOS</strong>
+        I router Cisco IOS integrano nativamente il servizio DHCP: non è necessario alcun server dedicato. In questo laboratorio il router 2901 svolge simultaneamente il ruolo di <em>gateway predefinito</em> per i client e di <em>server DHCP</em> per la rete <code>192.168.0.0/24</code>. Questa è la configurazione tipica nelle reti di piccole e medie dimensioni.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 3 ══════════ -->
+  <section id="topologia">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>Pianificazione della topologia</h2>
+    </div>
+    <p>Prima di aprire Packet Tracer pianifica l'indirizzamento su carta. La tabella seguente riassume tutti i parametri che utilizzeremo.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Dispositivo</th><th>Interfaccia</th><th>Indirizzo IP</th><th>Subnet Mask</th><th>Modalità</th><th>Note</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Router 2901</td>
+            <td><code>GigabitEthernet0/0</code></td>
+            <td><code>192.168.0.1</code></td>
+            <td><code>255.255.255.0</code></td>
+            <td><span class="tag router">IOS CLI</span></td>
+            <td>Gateway + server DHCP</td>
+          </tr>
+          <tr>
+            <td>PC-1</td>
+            <td><code>FastEthernet0</code></td>
+            <td><code>192.168.0.25</code></td>
+            <td><code>255.255.255.0</code></td>
+            <td><span class="tag static">Statico</span></td>
+            <td>Escluso dallo scope sul router</td>
+          </tr>
+          <tr>
+            <td>PC-2</td>
+            <td><code>FastEthernet0</code></td>
+            <td><code>192.168.0.20</code></td>
+            <td><code>255.255.255.0</code></td>
+            <td><span class="tag reserved">Prenotato</span></td>
+            <td>Host pool MAC↔IP sul router</td>
+          </tr>
+          <tr>
+            <td>PC-3</td>
+            <td><code>FastEthernet0</code></td>
+            <td>Dinamico</td>
+            <td><code>255.255.255.0</code></td>
+            <td><span class="tag dhcp">DHCP</span></td>
+            <td>Qualsiasi IP disponibile</td>
+          </tr>
+          <tr>
+            <td>PC-4</td>
+            <td><code>FastEthernet0</code></td>
+            <td>Dinamico</td>
+            <td><code>255.255.255.0</code></td>
+            <td><span class="tag dhcp">DHCP</span></td>
+            <td>Qualsiasi IP disponibile</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Parametri dello scope DHCP</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Parametro</th><th>Comando IOS</th><th>Valore</th></tr></thead>
+        <tbody>
+          <tr><td>Escludi router + indirizzi pre-scope</td><td><code>ip dhcp excluded-address</code></td><td><code>192.168.0.1 – .15</code></td></tr>
+          <tr><td>Escludi IP statico PC-1</td><td><code>ip dhcp excluded-address</code></td><td><code>192.168.0.25</code></td></tr>
+          <tr><td>Escludi indirizzi post-scope</td><td><code>ip dhcp excluded-address</code></td><td><code>192.168.0.32 – .254</code></td></tr>
+          <tr><td>Range dinamico effettivo</td><td>— (per differenza)</td><td><code>192.168.0.16 – .31</code> (16 addr.)</td></tr>
+          <tr><td>Prenotazione PC-2</td><td><code>host</code> + <code>hardware-address</code></td><td><code>192.168.0.20</code> ↔ MAC PC-2</td></tr>
+          <tr><td>Gateway</td><td><code>default-router</code></td><td><code>192.168.0.1</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout note">
+      <div class="callout-icon">📝</div>
+      <div class="callout-body">
+        <strong>Logica delle esclusioni su IOS</strong>
+        Il comando <code>ip dhcp excluded-address</code> lavora a livello globale: si specifica ciò che <em>non</em> deve essere assegnato e si definisce poi il pool sull'intera rete /24. Il router assegnerà solo gli indirizzi che non figurano nell'elenco degli esclusi. Questo approccio è più flessibile dell'indicare un range di start/end.
+      </div>
+    </div>
+
+    <h3>Diagramma della topologia</h3>
+    <div class="topology">
+      <div class="topo-title">🖧 Topologia di rete – Visione logica</div>
+      <div class="topo-grid">
+        <div class="topo-node">
+          <div class="topo-icon rtr">🔀</div>
+          <div class="topo-label">Router-DHCP</div>
+          <div class="topo-ip">Cisco 2901</div>
+          <div class="topo-ip" style="color:#6b21a8;background:#f0e8fb;border-color:#d8c0f8;">Gi0/0 · 192.168.0.1</div>
+        </div>
+        <div class="topo-line">—</div>
+        <div class="topo-node">
+          <div class="topo-icon sw">🔌</div>
+          <div class="topo-label">Switch0</div>
+          <div class="topo-ip">2960-24TT</div>
+        </div>
+        <div class="topo-line">—</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="topo-node" style="flex-direction:row;gap:10px;">
+            <div class="topo-icon pc" style="width:44px;height:44px;font-size:1.3rem;">💻</div>
+            <div><div class="topo-label">PC-1</div><div class="topo-ip">192.168.0.25 (statico)</div></div>
+          </div>
+          <div class="topo-node" style="flex-direction:row;gap:10px;">
+            <div class="topo-icon pc" style="width:44px;height:44px;font-size:1.3rem;">💻</div>
+            <div><div class="topo-label">PC-2</div><div class="topo-ip">192.168.0.20 (prenotato)</div></div>
+          </div>
+          <div class="topo-node" style="flex-direction:row;gap:10px;">
+            <div class="topo-icon pc" style="width:44px;height:44px;font-size:1.3rem;">💻</div>
+            <div><div class="topo-label">PC-3</div><div class="topo-ip">DHCP dinamico</div></div>
+          </div>
+          <div class="topo-node" style="flex-direction:row;gap:10px;">
+            <div class="topo-icon pc" style="width:44px;height:44px;font-size:1.3rem;">💻</div>
+            <div><div class="topo-label">PC-4</div><div class="topo-ip">DHCP dinamico</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 4 ══════════ -->
+  <section id="creazione">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>Creazione della topologia in Packet Tracer</h2>
+    </div>
+    <p>Apri Cisco Packet Tracer e crea un nuovo file vuoto (<strong>File → New</strong>).</p>
+
+    <h3>Aggiunta dei dispositivi</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-body">Dalla barra inferiore seleziona <strong>Network Devices → Routers</strong> e trascina un router <strong>2901</strong> nell'area di lavoro. Rinominalo <code>Router-DHCP</code> facendo doppio clic sull'etichetta.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Da <strong>Network Devices → Switches</strong> aggiungi uno switch <strong>2960-24TT</strong>. Rinominalo <code>Switch0</code> e posizionalo al centro.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Da <strong>End Devices → End Devices</strong> aggiungi quattro <strong>PC-PT</strong> e rinominali <code>PC-1</code>, <code>PC-2</code>, <code>PC-3</code>, <code>PC-4</code>. Disponili attorno allo switch.</div></div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Il router Cisco 2901 in Packet Tracer</strong>
+        Il 2901 dispone nativamente di due interfacce <code>GigabitEthernet</code> (Gi0/0 e Gi0/1). In questo lab utilizziamo solo <code>Gi0/0</code>. A differenza degli switch, le interfacce del router sono <em>administratively down</em> per default e richiedono il comando <code>no shutdown</code> per essere attivate.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "Topologia.png">
+      </div>
+    </div>
+
+    <h3>Collegamento dei cavi</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-body">Seleziona <strong>Connections → Copper Straight-Through</strong>.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Collega <code>Router-DHCP</code> porta <strong>GigabitEthernet0/0</strong> → <code>Switch0</code> porta <strong>FastEthernet0/1</strong>.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Collega i quattro PC allo switch:<br>PC-1 → Fa0/2 &nbsp;|&nbsp; PC-2 → Fa0/3 &nbsp;|&nbsp; PC-3 → Fa0/4 &nbsp;|&nbsp; PC-4 → Fa0/5</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Il link router–switch rimarrà <strong>arancione</strong> finché non si configura l'interfaccia con <code>no shutdown</code> nella sezione successiva. I link PC–switch diventeranno verdi subito.</div></div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+       <img src = "collegamenti.png">
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 5 ══════════ -->
+  <section id="router">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>Configurazione DHCP sul router Cisco 2901</h2>
+    </div>
+    <p>Tutta la configurazione avviene tramite la <strong>CLI IOS</strong>. Fai doppio clic su <code>Router-DHCP</code>, seleziona la scheda <strong>CLI</strong> e premi <kbd>Enter</kbd> per iniziare.</p>
+
+    <h3>5.1 – Accesso alla modalità di configurazione globale</h3>
+    <div class="ios-mode">▶ User EXEC mode: Router&gt;</div>
+    <pre><code><span class="prm">Router&gt;</span> <span class="cmd">enable</span>
+<span class="prm">Router#</span> <span class="cmd">configure terminal</span>
+<span class="cmt">Enter configuration commands, one per line. End with CNTL/Z.</span>
+<span class="prm">Router(config)#</span> <span class="cmd">hostname</span> <span class="str">Router-DHCP</span>
+<span class="prm">Router-DHCP(config)#</span></code></pre>
+
+    <div class="callout note">
+      <div class="callout-icon">📝</div>
+      <div class="callout-body">
+        <strong>Modalità IOS — Riepilogo</strong>
+        <code>enable</code> → passa da User EXEC (<code>&gt;</code>) a Privileged EXEC (<code>#</code>).
+        <code>configure terminal</code> → entra in Global Configuration (<code>(config)#</code>).
+        <code>interface Gi0/0</code> → entra in Interface Configuration (<code>(config-if)#</code>).
+        <code>ip dhcp pool</code> → entra in DHCP Pool Configuration (<code>(dhcp-config)#</code>).
+        <code>exit</code> risale di un livello; <code>end</code> torna direttamente a Privileged EXEC.
+      </div>
+    </div>
+
+    <h3>5.2 – Configurazione dell'interfaccia LAN (GigabitEthernet0/0)</h3>
+    <div class="ios-mode">▶ Global Configuration: Router-DHCP(config)#</div>
+    <pre><code><span class="prm">Router-DHCP(config)#</span> <span class="cmd">interface</span> <span class="kw">GigabitEthernet0/0</span>
+<span class="prm">Router-DHCP(config-if)#</span> <span class="cmd">description</span> <span class="str">LAN-DHCP</span>
+<span class="prm">Router-DHCP(config-if)#</span> <span class="cmd">ip address</span> <span class="val">192.168.0.1</span> <span class="val">255.255.255.0</span>
+<span class="prm">Router-DHCP(config-if)#</span> <span class="cmd">no shutdown</span>
+<span class="prm">Router-DHCP(config-if)#</span> <span class="cmd">exit</span></code></pre>
+
+    <p>Dopo <code>no shutdown</code> IOS stamperà i messaggi di link-up:</p>
+    <pre><code><span class="cmt">%LINK-5-CHANGED: Interface GigabitEthernet0/0, changed state to up
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0, changed state to up</span></code></pre>
+    <p>Il link router–switch nell'area di lavoro diventerà <strong>verde</strong>.</p>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "router_config.png">
+      </div>
+    </div>
+
+    <h3>5.3 – Dichiarazione degli indirizzi esclusi</h3>
+    <p>Prima di creare i pool è <strong>obbligatorio</strong> dichiarare tutti gli indirizzi che il router non deve assegnare.</p>
+    <div class="ios-mode">▶ Global Configuration: Router-DHCP(config)#</div>
+    <pre><code><span class="cmt">! 1) Escludi il router stesso e tutti gli indirizzi prima dello scope</span>
+<span class="prm">Router-DHCP(config)#</span> <span class="cmd">ip dhcp excluded-address</span> <span class="val">192.168.0.1</span> <span class="val">192.168.0.15</span>
+
+<span class="cmt">! 2) Escludi l'IP statico di PC-1 (cade dentro lo scope .16-.31)</span>
+<span class="prm">Router-DHCP(config)#</span> <span class="cmd">ip dhcp excluded-address</span> <span class="val">192.168.0.25</span>
+
+<span class="cmt">! 3) Escludi tutti gli indirizzi oltre il limite superiore dello scope</span>
+<span class="prm">Router-DHCP(config)#</span> <span class="cmd">ip dhcp excluded-address</span> <span class="val">192.168.0.32</span> <span class="val">192.168.0.254</span></code></pre>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>Le esclusioni vanno PRIMA dei pool</strong>
+        Se si crea prima il pool e poi si aggiungono le esclusioni, esiste la possibilità teorica che il router assegni uno degli indirizzi da escludere durante la finestra di tempo precedente all'esclusione stessa. Dichiara sempre le esclusioni come prima operazione.
+      </div>
+    </div>
+
+    <h3>5.4 – Creazione del pool DHCP principale (LAN)</h3>
+    <p>Il pool <code>LAN</code> gestisce l'assegnazione dinamica per PC-3, PC-4 e qualsiasi client futuro nell'intervallo consentito.</p>
+    <div class="ios-mode">▶ DHCP Pool Configuration: Router-DHCP(dhcp-config)#</div>
+    <pre><code><span class="prm">Router-DHCP(config)#</span> <span class="cmd">ip dhcp pool</span> <span class="str">LAN</span>
+
+<span class="cmt">! Dichiara la rete su cui opera il pool (intera /24)</span>
+<span class="prm">Router-DHCP(dhcp-config)#</span> <span class="cmd">network</span> <span class="val">192.168.0.0</span> <span class="val">255.255.255.0</span>
+
+<span class="cmt">! Gateway predefinito che verrà comunicato ai client</span>
+<span class="prm">Router-DHCP(dhcp-config)#</span> <span class="cmd">default-router</span> <span class="val">192.168.0.1</span>
+
+<span class="prm">Router-DHCP(dhcp-config)#</span> <span class="cmd">exit</span></code></pre>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Range effettivo di assegnazione</strong>
+        Grazie alle esclusioni il router assegnerà dinamicamente solo gli indirizzi da <code>192.168.0.16</code> a <code>192.168.0.31</code>, saltando <code>.20</code> (prenotazione PC-2) e <code>.25</code> (statico PC-1). Il risultato è uno scope di 16 indirizzi con 14 effettivamente disponibili per l'assegnazione dinamica.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "config_router.png">
+      </div>
+    </div>
+
+    <h3>5.5 – Lettura del MAC address di PC-2</h3>
+    <p>Prima di creare il pool di prenotazione occorre conoscere il MAC address di PC-2.</p>
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-body">Fai doppio clic su <code>PC-2</code> → scheda <strong>Config</strong> → voce <strong>FastEthernet0</strong> nel pannello sinistro.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Annota il valore del campo <strong>MAC Address</strong>, nel formato <code>XXXX.XXXX.XXXX</code>. Ti servirà nel passo successivo.</div></div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "MAC_PC2.png">
+      </div>
+    </div>
+
+    <h3>5.6 – Creazione del pool di prenotazione per PC-2 (DA NON FARE !!!)</h3>
+    <p>Il pool <code>PC2-RESERVED</code> usa la direttiva <code>host</code> per legare un IP specifico al MAC di PC-2. Sostituisci <code>xxxx.xxxx.xxxx</code> con il MAC reale annotato nel passo precedente.</p>
+    <div class="ios-mode">▶ DHCP Pool Configuration: Router-DHCP(dhcp-config)#</div>
+    <pre><code><span class="prm">Router-DHCP(config)#</span> <span class="cmd">ip dhcp pool</span> <span class="str">PC2-RESERVED</span>
+
+<span class="cmt">! Prenotazione su singolo host (non su rete)</span>
+<span class="prm">Router-DHCP(dhcp-config)#</span> <span class="cmd">host</span> <span class="val">192.168.0.20</span> <span class="val">255.255.255.0</span>
+
+<span class="cmt">! MAC address di PC-2 — sostituisci con il valore reale</span>
+<span class="prm">Router-DHCP(dhcp-config)#</span> <span class="cmd">hardware-address</span> <span class="val">xxxx.xxxx.xxxx</span>
+
+<span class="cmt">! Gateway per il client prenotato</span>
+<span class="prm">Router-DHCP(dhcp-config)#</span> <span class="cmd">default-router</span> <span class="val">192.168.0.1</span>
+
+<span class="prm">Router-DHCP(dhcp-config)#</span> <span class="cmd">exit</span></code></pre>
+
+    <div class="callout note">
+      <div class="callout-icon">📝</div>
+      <div class="callout-body">
+        <strong>hardware-address vs client-identifier</strong>
+        In IOS esistono due modi per identificare il client in un host pool. <code>hardware-address</code> usa il MAC address Layer 2 (ideale per PC). <code>client-identifier</code> usa l'opzione DHCP 61 inviata dal client, che in Windows viene composta prefissando <code>01</code> al MAC. In Packet Tracer il comando <code>hardware-address</code> è il più affidabile con i PC-PT.
+      </div>
+    </div>
+
+    <h3>5.7 – Salvataggio della configurazione</h3>
+    <pre><code><span class="prm">Router-DHCP(config)#</span> <span class="cmd">end</span>
+<span class="prm">Router-DHCP#</span> <span class="cmd">write memory</span>
+<span class="cmt">Building configuration...
+[OK]</span></code></pre>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>write memory è indispensabile</strong>
+        Senza questo comando la configurazione vive solo in RAM e viene persa al riavvio. <code>write memory</code> è l'abbreviazione di <code>copy running-config startup-config</code>: copia la running-config dalla RAM alla NVRAM, rendendola persistente.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <div class="screenshot-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M3 8h18"/></svg></div>
+        <div class="screenshot-label">📷 Screenshot 6</div>
+        <div class="screenshot-desc">CLI con la configurazione del pool PC2-RESERVED e l'output di write memory [OK].</div>
+      </div>
+    </div>
+
+    <h3>5.8 – Configurazione completa del router (riepilogo)</h3>
+    <p>Di seguito la configurazione integrale che puoi confrontare con il tuo file di lavoro usando il comando <code>show running-config</code>:</p>
+    <div class="ios-mode">▶ Configurazione completa — Router-DHCP</div>
+    <pre><code><span class="cmd">hostname</span> <span class="str">Router-DHCP</span>
+<span class="cmt">!</span>
+<span class="cmt">! ─── Indirizzi esclusi dallo scope DHCP ────────────────────────</span>
+<span class="cmd">ip dhcp excluded-address</span> <span class="val">192.168.0.1</span>   <span class="val">192.168.0.15</span>
+<span class="cmd">ip dhcp excluded-address</span> <span class="val">192.168.0.25</span>
+<span class="cmd">ip dhcp excluded-address</span> <span class="val">192.168.0.32</span>  <span class="val">192.168.0.254</span>
+<span class="cmt">!</span>
+<span class="cmt">! ─── Pool principale: assegnazione dinamica (.16–.31) ──────────</span>
+<span class="cmd">ip dhcp pool</span> <span class="str">LAN</span>
+ <span class="cmd">network</span>        <span class="val">192.168.0.0</span> <span class="val">255.255.255.0</span>
+ <span class="cmd">default-router</span> <span class="val">192.168.0.1</span>
+<span class="cmt">!</span>
+<span class="cmt">! ─── Pool prenotazione: PC-2 riceve sempre .20 ─────────────────</span>
+<span class="cmd">ip dhcp pool</span> <span class="str">PC2-RESERVED</span>
+ <span class="cmd">host</span>             <span class="val">192.168.0.20</span> <span class="val">255.255.255.0</span>
+ <span class="cmd">hardware-address</span> <span class="val">xxxx.xxxx.xxxx</span>  <span class="cmt">← MAC reale di PC-2</span>
+ <span class="cmd">default-router</span>   <span class="val">192.168.0.1</span>
+<span class="cmt">!</span>
+<span class="cmt">! ─── Interfaccia LAN ───────────────────────────────────────────</span>
+<span class="cmd">interface GigabitEthernet0/0</span>
+ <span class="cmd">description</span> <span class="str">LAN-DHCP</span>
+ <span class="cmd">ip address</span>  <span class="val">192.168.0.1</span> <span class="val">255.255.255.0</span>
+ <span class="cmd">no shutdown</span>
+<span class="cmt">!</span></code></pre>
+  </section>
+
+  <!-- ══════════ 6 ══════════ -->
+  <section id="pc1">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h2>Configurazione PC-1 — Indirizzo IP statico</h2>
+    </div>
+    <p>PC-1 usa l'indirizzo <code>192.168.0.25</code> in modo statico. L'indirizzo cade dentro lo scope (<code>.16</code>–<code>.31</code>), ma è già stato escluso sul router con <code>ip dhcp excluded-address 192.168.0.25</code>: il server non lo assegnerà mai a nessun altro client.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-body">Fai doppio clic su <code>PC-1</code>.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Vai in <strong>Desktop → IP Configuration</strong>.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Seleziona <strong>Static</strong> e inserisci i valori seguenti:</div></div>
+    </div>
+
+    <pre><code><span class="kw">IP Address     :</span> <span class="val">192.168.0.25</span>
+<span class="kw">Subnet Mask    :</span> <span class="val">255.255.255.0</span>
+<span class="kw">Default Gateway:</span> <span class="val">192.168.0.1</span>   <span class="cmt">← interfaccia Gi0/0 del router</span></code></pre>
+
+    <div class="callout warning">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>Non abilitare mai DHCP su PC-1</strong>
+        Anche con l'esclusione attiva sul router, impostare PC-1 in modalità DHCP lo porterebbe a ricevere un IP diverso (<code>.16</code> o successivo) perdendo il suo indirizzo fisso previsto dal progetto di rete.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "PC1_Config.png">
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 7 ══════════ -->
+  <section id="pc2">
+    <div class="section-header">
+      <div class="section-num">7</div>
+      <h2>Configurazione PC-2 — Indirizzo riservato (Aggiungerlo semplicemente come IP Statico)</h2>
+    </div>
+    <p>PC-2 riceve sempre l'indirizzo <code>192.168.0.20</code> grazie al pool <code>PC2-RESERVED</code> configurato sul router. A differenza di PC-1, PC-2 è impostato in modalità <strong>DHCP</strong>: sarà il router a garantirgli sempre lo stesso IP tramite la corrispondenza MAC↔IP.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-body">Fai doppio clic su <code>PC-2</code> → <strong>Desktop → IP Configuration</strong>.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Seleziona <strong>DHCP</strong>. Dopo qualche secondo il router riconoscerà il MAC di PC-2 e risponderà con l'offerta <code>192.168.0.20</code>.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Verifica che i campi mostrino: <strong>IP</strong> <code>192.168.0.20</code> · <strong>Mask</strong> <code>255.255.255.0</code> · <strong>Gateway</strong> <code>192.168.0.1</code>.</div></div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Se PC-2 non riceve 192.168.0.20</strong>
+        Torna sulla CLI del router ed esegui <code>show ip dhcp pool PC2-RESERVED</code>. Verifica che il MAC nel campo <code>hardware-address</code> corrisponda esattamente a quello di PC-2. Anche un singolo carattere errato impedisce il match e il client riceverà un IP dinamico dal pool LAN.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "PC2_Config.png">
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 8 ══════════ -->
+  <section id="pc3pc4">
+    <div class="section-header">
+      <div class="section-num">8</div>
+      <h2>Configurazione PC-3 e PC-4 — Client DHCP dinamici</h2>
+    </div>
+    <p>PC-3 e PC-4 riceveranno un indirizzo IP disponibile nel range <code>192.168.0.16–.31</code> (esclusi <code>.20</code> riservato a PC-2 e <code>.25</code> statico di PC-1). La procedura è identica per entrambi.</p>
+
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-body">Fai doppio clic su <code>PC-3</code> → <strong>Desktop → IP Configuration</strong>.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Seleziona <strong>DHCP</strong>. Dopo qualche secondo si compileranno automaticamente: indirizzo IP (da <code>.16</code> in poi), subnet mask e default gateway <code>192.168.0.1</code>.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Ripeti identicamente per <code>PC-4</code>: riceverà l'IP successivo disponibile nello scope.</div></div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Se l'IP non viene assegnato</strong>
+        Forza un nuovo DHCPDISCOVER passando temporaneamente da DHCP a Static e tornando a DHCP. Puoi anche verificare lo stato dell'interfaccia del router con <code>show interfaces GigabitEthernet0/0</code>: deve mostrare <em>GigabitEthernet0/0 is up, line protocol is up</em>.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "PC3_Config.png">
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "PC4_Config.png">
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 9 ══════════ -->
+  <section id="test">
+    <div class="section-header">
+      <div class="section-num">9</div>
+      <h2>Test e verifica della rete</h2>
+    </div>
+    <p>Verifica il corretto funzionamento sia dalla CLI del router che dal Command Prompt dei PC client.</p>
+
+    <h3>9.1 – Verifica sul router: show ip dhcp pool</h3>
+    <div class="ios-mode">▶ Privileged EXEC: Router-DHCP#</div>
+    <pre><code><span class="prm">Router-DHCP#</span> <span class="cmd">show ip dhcp pool</span>
+
+<span class="cmt">Pool LAN :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0
+ Total addresses                : 254
+ Leased addresses               : 2         ← PC-3 e PC-4
+ Excluded addresses             : 3         ← esclusi globali
+ Pending event                  : none
+ 1 subnet is currently in the pool :
+ Current index        IP address range                    Leased/Excluded/Total
+ 192.168.0.17         192.168.0.1     - 192.168.0.254      2    / 3    / 254</span>
+
+<span class="cmt">Pool PC2-RESERVED :
+ Utilization mark (high/low)    : 100 / 0
+ Subnet size (first/next)       : 0 / 0
+ Total addresses                : 1
+ Leased addresses               : 1         ← PC-2
+ Excluded addresses             : 0
+ Pending event                  : none</span></code></pre>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "Router_prova.png">
+      </div>
+    </div>
+
+    <h3>9.2 – Verifica sul router: show ip dhcp binding</h3>
+    <div class="ios-mode">▶ Privileged EXEC: Router-DHCP#</div>
+    <pre><code><span class="prm">Router-DHCP#</span> <span class="cmd">show ip dhcp binding</span>
+
+<span class="cmt">Bindings from all pools not associated with VRF:
+IP address       Client-ID/              Lease expiration        Type
+                 Hardware address/
+                 User name
+192.168.0.20     xxxx.xxxx.xxxx          --                      Manual
+192.168.0.16     yyyy.yyyy.yyyy          Mar 07 2026 04:00 AM    Automatic
+192.168.0.17     zzzz.zzzz.zzzz          Mar 07 2026 04:00 AM    Automatic</span></code></pre>
+
+    <p>La colonna <em>Type</em> mostra: <strong>Manual</strong> per la prenotazione di PC-2 (senza scadenza) e <strong>Automatic</strong> per i binding dinamici di PC-3 e PC-4 con scadenza a 12 ore.</p>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "binding.png">
+      </div>
+    </div>
+
+    <h3>9.3 – Verifica sui client: ipconfig</h3>
+    <p>Apri il Command Prompt di PC-3 (<strong>Desktop → Command Prompt</strong>):</p>
+    <pre><code><span class="kw">C:\&gt;</span> <span class="val">ipconfig</span>
+
+<span class="cmt">FastEthernet0 Connection:(default port)
+
+   IPv4 Address. . . . . . . . . . .: 192.168.0.16
+   Subnet Mask . . . . . . . . . . .: 255.255.255.0
+   Default Gateway . . . . . . . . .: 192.168.0.1</span></code></pre>
+
+    <div class="callout note">
+      <div class="callout-icon">📝</div>
+      <div class="callout-body">
+        <strong>Il Default Gateway è ora valorizzato</strong>
+        A differenza di una configurazione con server dedicato senza router, ora il campo <em>Default Gateway</em> mostra <code>192.168.0.1</code> perché il router comunica il proprio IP tramite la direttiva <code>default-router</code> del pool DHCP. Questo permette ai client di raggiungere reti esterne, se il router avesse un'altra interfaccia WAN configurata.
+      </div>
+    </div>
+
+    <h3>9.4 – Test di connettività: ping</h3>
+    <pre><code><span class="cmt"># Da PC-3 → verifica raggiungibilità del gateway (router)</span>
+<span class="kw">C:\&gt;</span> <span class="val">ping 192.168.0.1</span>
+
+<span class="cmt"># Da PC-3 → verifica raggiungibilità di PC-1 (statico)</span>
+<span class="kw">C:\&gt;</span> <span class="val">ping 192.168.0.25</span>
+
+<span class="cmt"># Da PC-3 → verifica raggiungibilità di PC-2 (prenotato)</span>
+<span class="kw">C:\&gt;</span> <span class="val">ping 192.168.0.20</span>
+
+<span class="cmt"># Da PC-3 → verifica raggiungibilità di PC-4 (dinamico)</span>
+<span class="kw">C:\&gt;</span> <span class="val">ping &lt;IP-di-PC-4&gt;</span></code></pre>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "ping.png">
+      </div>
+    </div>
+
+    <h3>9.5 – Simulazione del processo DORA in Simulation Mode</h3>
+
+    <p>La modalità <strong>Simulation</strong> di Packet Tracer permette di rallentare il tempo di rete e di ispezionare ogni singolo pacchetto scambiato tra i dispositivi. In questa sezione seguiremo i quattro passi del processo DORA passo-passo, aprendo il PDU Inspector per leggere i campi significativi di ciascun messaggio DHCP.</p>
+
+    <h3>Preparazione dell'ambiente di simulazione</h3>
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-body">In basso a destra di Packet Tracer clicca sull'icona a forma di <strong>orologio</strong> (oppure premi <kbd>Shift+S</kbd>) per passare dalla modalità Realtime alla modalità <strong>Simulation</strong>. L'area di lavoro diventerà leggermente più scura e comparirà il pannello <em>Simulation Panel</em> a destra.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Nel pannello Simulation, clicca su <strong>Edit Filters</strong>. Si aprirà la finestra dei filtri di protocollo. Deseleziona tutti i protocolli e lascia attivo <strong>solo DHCP</strong> (e, facoltativamente, ARP) per evitare che la Event List venga sopraffatta da traffico irrilevante.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-body">Torna su <code>PC-4</code> → <strong>Desktop → IP Configuration</strong>. Seleziona <strong>Static</strong>, lascia i campi vuoti, poi seleziona di nuovo <strong>DHCP</strong>. Questa operazione forza PC-4 a rilasciare l'eventuale configurazione precedente e a inviare un nuovo <code>DHCPDISCOVER</code>.</div></div>
+    </div>
+
+    <div class="callout note">
+      <div class="callout-icon">📝</div>
+      <div class="callout-body">
+        <strong>Perché usare PC-4 e non PC-2?</strong>
+        PC-2 ha una prenotazione (host pool): il router risponde con un <code>DHCPOFFER</code> destinato direttamente a quel MAC. Il processo DORA avviene comunque, ma è più istruttivo osservarlo su PC-4 che ottiene un IP dinamico dal pool LAN, perché il traffico <em>broadcast</em> è più evidente nella topologia.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "simulation.png">
+      </div>
+    </div>
+
+    <h3>Passo 1 — DHCPDISCOVER (PC-4 → broadcast)</h3>
+    <p>Clicca una volta sul pulsante <strong>Capture / Forward</strong> (▶|). Nella Event List apparirà la prima voce: un pacchetto DHCP di tipo <strong>DHCPDISCOVER</strong> originato da PC-4.</p>
+    <p>Nell'area di lavoro noterai un'<strong>envelope animata</strong> che si propaga a tutti i dispositivi collegati allo switch: si tratta di un pacchetto <strong>broadcast</strong> (indirizzo IP di destinazione <code>255.255.255.0</code>, MAC di destinazione <code>FF:FF:FF:FF:FF:FF</code>).</p>
+    <p>Clicca sull'envelope (o sulla riga nella Event List) per aprire il <strong>PDU Inspector</strong>. Esamina le schede:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scheda PDU</th><th>Campo da osservare</th><th>Valore atteso</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OSI Model</strong></td><td>Layer 3 – Src IP</td><td><code>0.0.0.0</code> — il client non ha ancora un IP</td></tr>
+          <tr><td><strong>OSI Model</strong></td><td>Layer 3 – Dst IP</td><td><code>255.255.255.0</code> — broadcast limitato</td></tr>
+          <tr><td><strong>OSI Model</strong></td><td>Layer 2 – Dst MAC</td><td><code>FFFF.FFFF.FFFF</code> — broadcast Ethernet</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>DHCP Message Type</td><td><code>1</code> = DHCPDISCOVER</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Client IP Address (ciaddr)</td><td><code>0.0.0.0</code></td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Client Hardware Address (chaddr)</td><td>MAC di PC-4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+        <img src = "pdu_1.png">
+      </div>
+    </div>
+
+    <h3>Passo 2 — DHCPOFFER (Router-DHCP → PC-4)</h3>
+    <p>Clicca di nuovo su <strong>Capture / Forward</strong>. Il router elabora il Discover e risponde con un <strong>DHCPOFFER</strong>. Nell'area di lavoro l'envelope si sposta ora dal router verso PC-4.</p>
+    <p>Apri il PDU Inspector di questo pacchetto e verifica:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scheda PDU</th><th>Campo da osservare</th><th>Valore atteso</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OSI Model</strong></td><td>Layer 3 – Src IP</td><td><code>192.168.0.1</code> — l'interfaccia Gi0/0 del router</td></tr>
+          <tr><td><strong>OSI Model</strong></td><td>Layer 3 – Dst IP</td><td><code>255.255.255.0</code> oppure IP offerto (dipende dall'implementazione)</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>DHCP Message Type</td><td><code>2</code> = DHCPOFFER</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Your IP Address (yiaddr)</td><td><code>192.168.0.16</code> (o il primo IP libero dello scope)</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Options: Subnet Mask</td><td><code>255.255.255.0</code></td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Options: Router (gateway)</td><td><code>192.168.0.1</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Cosa significa yiaddr?</strong>
+        Il campo <em>Your IP Address</em> (<code>yiaddr</code>) contiene l'indirizzo IP che il server sta offrendo al client. Il client legge questo campo per sapere quale IP potrà richiedere nel passo successivo (DHCPREQUEST). Il server si riserva provvisoriamente quell'IP fino al completamento del processo DORA.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+         <img src = "pdu_2.png">
+      </div>
+    </div>
+
+    <h3>Passo 3 — DHCPREQUEST (PC-4 → broadcast)</h3>
+    <p>Clicca ancora su <strong>Capture / Forward</strong>. PC-4 ha ricevuto l'offerta e ora la <em>accetta formalmente</em> inviando un <strong>DHCPREQUEST</strong> in <strong>broadcast</strong>. Il broadcast è intenzionale: serve a notificare <em>tutti</em> i possibili server DHCP presenti sulla rete che il client ha scelto questa offerta specifica, permettendo agli altri server (se presenti) di ritirare le proprie offerte concorrenti.</p>
+    <p>Verifica nel PDU Inspector:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scheda PDU</th><th>Campo da osservare</th><th>Valore atteso</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OSI Model</strong></td><td>Layer 3 – Src IP</td><td><code>0.0.0.0</code> — il client non usa ancora l'IP offerto</td></tr>
+          <tr><td><strong>OSI Model</strong></td><td>Layer 3 – Dst IP</td><td><code>255.255.255.0</code> — ancora broadcast</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>DHCP Message Type</td><td><code>3</code> = DHCPREQUEST</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Options: Requested IP Address</td><td><code>192.168.0.16</code> — l'IP ricevuto nell'Offer</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Options: DHCP Server Identifier</td><td><code>192.168.0.1</code> — indica quale server è stato scelto</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout note">
+      <div class="callout-icon">📝</div>
+      <div class="callout-body">
+        <strong>Perché il DHCPREQUEST è ancora broadcast?</strong>
+        Il client non ha ancora un indirizzo IP valido assegnato (l'Offer è solo una proposta), quindi non può inviare pacchetti IP unicast. Invia quindi in broadcast e include nell'opzione <em>Server Identifier</em> il campo che identifica il server scelto, consentendo agli altri eventuali server di leggere il messaggio e liberare le loro offerte pendenti.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+         <img src = "pdu_3.png">
+      </div>
+    </div>
+
+    <h3>Passo 4 — DHCPACK (Router-DHCP → PC-4)</h3>
+    <p>Clicca un'ultima volta su <strong>Capture / Forward</strong>. Il router riceve il DHCPREQUEST, verifica che l'IP richiesto sia ancora disponibile e risponde con un <strong>DHCPACK</strong> (Acknowledgement). Questo è il messaggio che <em>ufficializza</em> l'assegnazione: da questo momento PC-4 può utilizzare l'IP ricevuto.</p>
+    <p>Dopo questo passaggio, torna su PC-4 → <strong>Desktop → IP Configuration</strong>: dovresti vedere i campi compilati con i valori definitivi.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Scheda PDU</th><th>Campo da osservare</th><th>Valore atteso</th></tr></thead>
+        <tbody>
+          <tr><td><strong>OSI Model</strong></td><td>Layer 3 – Src IP</td><td><code>192.168.0.1</code></td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>DHCP Message Type</td><td><code>5</code> = DHCPACK</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Your IP Address (yiaddr)</td><td><code>192.168.0.16</code> — IP definitivamente assegnato</td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Options: Router (gateway)</td><td><code>192.168.0.1</code></td></tr>
+          <tr><td><strong>Inbound / Outbound PDU</strong></td><td>Options: Subnet Mask</td><td><code>255.255.255.0</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+         <img src = "pdu_4.png">
+      </div>
+    </div>
+
+    <h3>Riepilogo visivo della Event List</h3>
+    <p>Al termine dei quattro passi la Event List mostrerà la seguente sequenza. Puoi cliccare su ciascuna riga per riaprire il PDU Inspector in qualsiasi momento.</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Evento</th><th>Sorgente</th><th>Destinazione</th><th>Tipo</th><th>Significato</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>DHCPDISCOVER</td>
+            <td>PC-4 (<code>0.0.0.0</code>)</td>
+            <td>Broadcast (<code>255.255.255.0</code>)</td>
+            <td>UDP 67/68</td>
+            <td>"C'è un server DHCP in rete? Ho bisogno di un IP."</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>DHCPOFFER</td>
+            <td>Router (<code>192.168.0.1</code>)</td>
+            <td>Broadcast / PC-4</td>
+            <td>UDP 67/68</td>
+            <td>"Sì, ti offro l'IP <code>192.168.0.16</code>."</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>DHCPREQUEST</td>
+            <td>PC-4 (<code>0.0.0.0</code>)</td>
+            <td>Broadcast (<code>255.255.255.0</code>)</td>
+            <td>UDP 67/68</td>
+            <td>"Accetto l'offerta del server <code>192.168.0.1</code> per l'IP <code>192.168.0.16</code>."</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>DHCPACK</td>
+            <td>Router (<code>192.168.0.1</code>)</td>
+            <td>PC-4</td>
+            <td>UDP 67/68</td>
+            <td>"Confermato. L'IP <code>192.168.0.16</code> è tuo."</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Le porte UDP 67 e 68</strong>
+        I messaggi DHCP viaggiano su UDP. Il server ascolta sulla porta <strong>67</strong> (bootps) e il client sulla porta <strong>68</strong> (bootpc). Puoi verificarlo nel PDU Inspector aprendo la scheda Transport Layer: vedrai Src Port e Dst Port con questi valori. L'uso di UDP invece di TCP è intenzionale: durante il processo DORA il client non ha ancora un indirizzo IP valido e non può stabilire una connessione TCP.
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <div class="screenshot-inner">
+         <img src = "ultima.png">
+      </div>
+    </div>
+
+    <div class="callout note">
+      <div class="callout-icon">📝</div>
+      <div class="callout-body">
+        <strong>Torna alla modalità Realtime</strong>
+        Dopo aver completato l'osservazione clicca sull'icona <strong>Realtime</strong> (il fulmine) per ripristinare il funzionamento normale della rete. La modalità Simulation sospende il tempo di rete: lasciandola attiva potresti non ricevere risposte ai ping e ad altri test.
+      </div>
+    </div>
+
+    <h3>9.6 – Riepilogo dei risultati attesi</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Dispositivo</th><th>IP atteso</th><th>Gateway</th><th>Metodo</th><th>✅ Verifica</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Router-DHCP (Gi0/0)</td>
+            <td><code>192.168.0.1</code></td>
+            <td>—</td>
+            <td>IOS <code>ip address</code></td>
+            <td><code>show interfaces Gi0/0</code></td>
+          </tr>
+          <tr>
+            <td>PC-1</td>
+            <td><code>192.168.0.25</code></td>
+            <td><code>192.168.0.1</code></td>
+            <td>Statico manuale</td>
+            <td><code>ipconfig</code> su PC-1</td>
+          </tr>
+          <tr>
+            <td>PC-2</td>
+            <td><code>192.168.0.20</code></td>
+            <td><code>192.168.0.1</code></td>
+            <td>DHCP prenotato (Manual)</td>
+            <td><code>show ip dhcp binding</code></td>
+          </tr>
+          <tr>
+            <td>PC-3</td>
+            <td><code>.16–.31</code> (esclusi .20, .25)</td>
+            <td><code>192.168.0.1</code></td>
+            <td>DHCP dinamico</td>
+            <td><code>ipconfig</code> + ping → router</td>
+          </tr>
+          <tr>
+            <td>PC-4</td>
+            <td><code>.16–.31</code> (esclusi .20, .25, IP PC-3)</td>
+            <td><code>192.168.0.1</code></td>
+            <td>DHCP dinamico</td>
+            <td><code>ipconfig</code> + ping → router</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ══════════ 10 ══════════ -->
+  <section id="quiz">
+    <div class="section-header">
+      <div class="section-num">10</div>
+      <h2>Verifica di apprendimento</h2>
+    </div>
+    <p>Rispondi alle domande seguenti per verificare di aver compreso i concetti chiave. Clicca su "Mostra risposta" per vedere la soluzione.</p>
+
+    <div class="quiz">
+      <div class="quiz-title">🧠 Domande di verifica</div>
+
+      <div class="quiz-q">1. Perché su IOS le esclusioni DHCP devono essere dichiarate prima della creazione dei pool?</div>
+      <details class="quiz-reveal">
+        <summary>Mostra risposta</summary>
+        <p>Se il pool viene creato prima delle esclusioni, il router potrebbe assegnare uno degli indirizzi da escludere durante la breve finestra precedente alla dichiarazione. Configurando prima le esclusioni con <code>ip dhcp excluded-address</code>, IOS le considera immediatamente operative e non inserisce mai quegli indirizzi nel pool disponibile.</p>
+      </details>
+
+      <div class="quiz-q" style="margin-top:16px;">2. Qual è la differenza tra il comando <code>network</code> e il comando <code>host</code> all'interno di un pool DHCP IOS?</div>
+      <details class="quiz-reveal">
+        <summary>Mostra risposta</summary>
+        <p><code>network &lt;net&gt; &lt;mask&gt;</code> crea un pool dinamico da cui il router assegna indirizzi disponibili a qualsiasi client. <code>host &lt;IP&gt; &lt;mask&gt;</code> crea invece un pool di prenotazione per un singolo host identificato da MAC (o client-id): solo quel client specifico riceverà quell'IP, sempre e comunque.</p>
+      </details>
+
+      <div class="quiz-q" style="margin-top:16px;">3. Cosa mostra il comando <code>show ip dhcp binding</code> e come si distingue un binding Manual da uno Automatic?</div>
+      <details class="quiz-reveal">
+        <summary>Mostra risposta</summary>
+        <p>Il comando elenca tutti gli indirizzi IP attualmente assegnati dal server DHCP del router, con il MAC del client, la scadenza e il tipo. Un binding <strong>Manual</strong> corrisponde a una prenotazione host pool: non ha scadenza perché è legato permanentemente a un MAC. Un binding <strong>Automatic</strong> è assegnato dinamicamente dal pool LAN.</p>
+      </details>
+
+      <div class="quiz-q" style="margin-top:16px;">4. Perché è necessario eseguire <code>no shutdown</code> sull'interfaccia GigabitEthernet0/0 del router?</div>
+      <details class="quiz-reveal">
+        <summary>Mostra risposta</summary>
+        <p>Tutte le interfacce di un router Cisco IOS sono in stato <em>administratively down</em> per default: il sistema operativo le disabilita per sicurezza alla prima accensione. Il comando <code>no shutdown</code> le porta nello stato operativo (up/up). Senza di esso l'interfaccia non trasmette né riceve traffico, nemmeno se configurata con un indirizzo IP corretto. Gli switch Cisco, al contrario, hanno le porte attive di default.</p>
+      </details>
+
+      <div class="quiz-q" style="margin-top:16px;">5. Qual è la differenza pratica tra <code>write memory</code> e non salvare la configurazione? Cosa succede al riavvio del router?</div>
+      <details class="quiz-reveal">
+        <summary>Mostra risposta</summary>
+        <p>La <em>running-config</em> risiede in RAM ed è volatile: viene persa a ogni spegnimento o riavvio. <code>write memory</code> (equivalente a <code>copy running-config startup-config</code>) copia la configurazione attiva nella NVRAM come <em>startup-config</em>. Al riavvio il router carica la startup-config dalla NVRAM. Senza il salvataggio, al riavvio tutti i pool DHCP, le esclusioni e la configurazione dell'interfaccia vengono persi e il router riparte in stato di fabbrica (o con l'ultima configurazione salvata precedentemente).</p>
+      </details>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <strong>Sistemi e Reti</strong> · Classe 4ª Informatica · Tutorial Cisco Packet Tracer – DHCP su Router 2901<br>
+  Rete <code>192.168.0.0/24</code> · Router Gi0/0: <code>192.168.0.1</code> · Scope dinamico <code>.16–.31</code> · IOS 15
+</footer>
+
+</body>
+</html>
